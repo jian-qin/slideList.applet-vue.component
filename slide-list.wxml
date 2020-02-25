@@ -1,5 +1,5 @@
 <!--components/slide-list/slide-list.wxml-->
-<scroll-view class="wrap" style="color:{{color}};font-size:{{size}};{{sty}}" scroll-y enable-back-to-top lower-threshold='{{offset}}' bindscrolltolower='getList' refresher-enabled refresher-triggered='{{refresh}}' refresher-default-style='none' bindrefresherpulling='refresherpulling' bindrefresherrefresh='refresherrefresh'>
+<scroll-view class="wrap" style="color:{{color}};font-size:{{size}};{{sty}}" scroll-y enable-back-to-top scroll-top='{{scroll}}' lower-threshold='{{offset}}' bindscrolltolower='getList' refresher-enabled refresher-triggered='{{refresh}}' refresher-default-style='none' bindrefresherpulling='refresherpulling' bindrefresherrefresh='refresherrefresh'>
     <!-- 自定义下拉刷新 -->
     <view slot="refresher" class="refresh" wx:if='{{refresh !== "none"}}'>
         <text wx:if='{{triggerStaye == 0}}'>下拉即可刷新...</text>

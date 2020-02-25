@@ -67,6 +67,7 @@ Component({
             initial: 0, // 初始值
             value: 0, // 当前值
         },
+        scroll: 0, // 滚动条位置
         state: 0, // 状态：-1 隐藏，0 加载中，1 加载完成，2 加载失败
         isReq: true, // 请求状态
         refresh: false, // 下拉刷新状态：true 已触发，false 未触发，'none' 版本不支持
@@ -125,7 +126,13 @@ Component({
                                 initial: val,
                                 value: val
                             }
+                            this.data.state = 0
                             this.data.list = []
+                            this.data.isReq = true
+                            this.data.triggerStaye = 0
+                            this.setData({
+                                scroll: 0
+                            })
                             this.getList()
                             return
                         }
