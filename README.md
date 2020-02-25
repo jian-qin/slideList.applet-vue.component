@@ -6,7 +6,7 @@
 
 ```html
 <slide-list reqFn='{{reqFn}}' reqData='{{reqData}}' backSucc='{{backSucc}}'>
-    <view slot='list'>列表内容...</view>
+    <view slot='list' wx:for=''>列表内容...</view>
     <view slot='noData'>暂无数据提示（不传显示默认提示）</view>
 </slide-list>
 ```
