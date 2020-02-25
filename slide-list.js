@@ -69,14 +69,45 @@ Component({
         },
         state: 0, // 状态：-1 隐藏，0 加载中，1 加载完成，2 加载失败
         isReq: true, // 请求状态
-        refresh: false, // 下拉刷新状态：true 已触发，false 未触发
+        refresh: false, // 下拉刷新状态：true 已触发，false 未触发，'none' 版本不支持
         triggerStaye: 0, // 触发下拉刷新状态：0 下拉，1 释放，2 加载
+    },
+
+    lifetimes: {
+        // 在组件实例进入页面节点树时执行
+        attached() {
+            this.compareVersion(wx.getSystemInfoSync().SDKVersion, '2.10.1') == -1 && this.setData({
+                refresh: 'none'
+            })
+        },
     },
 
     /**
      * 组件的方法列表
      */
     methods: {
+        // 判断版本号
+        compareVersion(v1, v2) {
+            v1 = v1.split('.')
+            v2 = v2.split('.')
+            const len = Math.max(v1.length, v2.length)
+            while (v1.length < len) {
+                v1.push('0')
+            }
+            while (v2.length < len) {
+                v2.push('0')
+            }
+            for (let i = 0; i < len; i++) {
+                const num1 = parseInt(v1[i])
+                const num2 = parseInt(v2[i])
+                if (num1 > num2) {
+                    return 1
+                } else if (num1 < num2) {
+                    return -1
+                }
+            }
+            return 0
+        },
         // 初始化
         initialize() {
             let arr = this.data.reqData
