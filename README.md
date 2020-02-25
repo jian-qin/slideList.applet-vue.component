@@ -1,92 +1,51 @@
-# 分页列表 1.0
+# 分页列表 1.1.0
 
-## 效果还不错，就是代码有点多。
+## 改动：简化了使用组件的代码数量；这一版使用了 Promise 封装的 ajax，不能用可以去看看 1.0 版。
 
 ### wxml：
 
 ```html
-<slide-list state='{{state}}' isReq='{{isReq}}' bind:tolower='getList' refresh='{{refresh}}' bind:refresher='refreshList'>
-    列表内容...
-    <view wx:if='{{state == -1}}'>暂无内容提示</view>
+<slide-list reqFn='{{reqFn}}' reqData='{{reqData}}' backSucc='{{backSucc}}'>
+    <view slot='list'>列表内容...</view>
+    <view slot='noData'>暂无数据提示（不传显示默认提示）</view>
 </slide-list>
 ```
 
 ### js：
 
 ```javascript
+const ajax = require('../../utils/ajax.js') // 使用 Promise 封装的 ajax 方法
 Page({
     /**
     * 页面的初始数据
     */
     data: {
-        page: 0, // 页码
-        list: [], // 列表
-        state: 0, // 加载状态
-        isReq: false, // 请求状态
-        refresh: false, // 下拉刷新状态
+        reqFn: null, // 请求函数
+        reqData: null, // 请求参数
+        backSucc: null, // 请求成功回调
     },
-    // 获取列表
-    getList() {
-        调用接口...({
-            page: this.data.page
-        }).then(e => {
-            let list = e.data.list
-            if (list[0]) {
-                this.setData({
-                    list: this.data.list.concat(list),
-                    page: this.data.page + 1,
-                    isReq: false,
-                    state: 0,
-                })
-                this.data.page == 1 && this.getList() // 加载第2页
-            } else {
-                this.setData({
-                    isReq: false,
-                    // state: 1,
-                    state: this.data.list[0] ? 1 : -1, // 暂无内容提示
+    // 初始化
+    initialize() {
+        this.setData({
+            reqFn: ajax.get,
+            reqData: ['/apis/getGoodsList', {
+                __page: 0 // *注意：必须在页码字段前加上‘__’作为标识，在请求时会自动去除‘__’
+            }],
+            backSucc: (e, fn) => {
+                let arr = e.data.list
+                // 在这里处理列表数据...
+                fn(arr, (list, page, state) => {
+                    console.log('列表内容：', list, '，当前页码：', page, '，当前加载状态：', state)
+                    this.setData({ list })
                 })
             }
-        }).catch(er => {
-            this.setData({
-                isReq: false,
-                state: 2,
-            })
-        })
-    },
-    // 刷新列表
-    refreshList() {
-        调用接口...({
-            page: 0
-        }).then(e => {
-            let list = e.data.list
-            if (list[0]) {
-                this.setData({
-                    list,
-                    page: 1,
-                    refresh: false,
-                    state: 0,
-                })
-                this.getList() // 加载第2页
-            } else {
-                this.setData({
-                    list: [],
-                    refresh: false,
-                    // state: 1,
-                    state: -1, // 暂无内容提示
-                })
-            }
-        }).catch(er => {
-            this.setData({
-                refresh: false,
-                state: 2,
-            })
         })
     },
     /**
     * 生命周期函数--监听页面加载
     */
     onLoad: function () {
-        this.getList()
+        this.initialize()
     },
 })
 ```

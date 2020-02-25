@@ -30,3 +30,19 @@
     align-items: center;
     justify-content: center;
 }
+.noData{
+    display: flex;
+    overflow-x: hidden;
+}
+.noData>view{
+    width: 100%;
+    flex-shrink: 0;
+}
+.noData-default{
+    text-align: center;
+}
+.noData-default>image{
+    width: 200rpx;
+    height: 130rpx;
+    margin: 100rpx auto 40rpx;
+}

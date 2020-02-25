@@ -1,5 +1,5 @@
 <!--components/slide-list/slide-list.wxml-->
-<scroll-view class="wrap" style="color:{{color}};font-size:{{size}};{{sty}}" scroll-y enable-back-to-top lower-threshold='{{offset}}' bindscrolltolower='scrolltolower' refresher-enabled='{{refresh !== ""}}' refresher-triggered='{{refresh}}' refresher-default-style='none' bindrefresherpulling='refresherpulling' bindrefresherrefresh='refresherrefresh'>
+<scroll-view class="wrap" style="color:{{color}};font-size:{{size}};{{sty}}" scroll-y enable-back-to-top lower-threshold='{{offset}}' bindscrolltolower='getList' refresher-enabled refresher-triggered='{{refresh}}' refresher-default-style='none' bindrefresherpulling='refresherpulling' bindrefresherrefresh='refresherrefresh'>
     <!-- 自定义下拉刷新 -->
     <view slot="refresher" class="refresh">
         <text wx:if='{{triggerStaye == 0}}'>下拉即可刷新...</text>
@@ -10,8 +10,10 @@
         </block>
     </view>
     <!-- 添加滚动 -->
-    <view style="margin-top:1rpx" wx:if='{{refresh !== ""}}'></view>
-    <slot></slot>
+    <view style="margin-top:1rpx"></view>
+    <!-- 列表内容 -->
+    <slot name='list'></slot>
+    <!-- 加载状态 -->
     <view class="state" wx:if='{{state != -1}}'>
         <!-- 0 加载中 -->
         <block wx:if='{{state == 0}}'>
@@ -21,6 +23,16 @@
         <!-- 1 加载完成 -->
         <text wx:elif='{{state == 1}}'>{{endTxt}}</text>
         <!-- 2 加载失败 -->
-        <text wx:elif='{{state == 2}}' bindtap="scrolltolower">{{errorTxt}}</text>
+        <text wx:elif='{{state == 2}}' bindtap="getList">{{errorTxt}}</text>
+    </view>
+    <!-- 无数据提示 -->
+    <view class="noData" wx:else>
+        <!-- 设置 -->
+        <slot name='noData'></slot>
+        <!-- 默认 -->
+        <view class="noData-default">
+            <image src='/images/icon/noData.png'></image>
+            <view>暂无数据</view>
+        </view>
     </view>
 </scroll-view>
