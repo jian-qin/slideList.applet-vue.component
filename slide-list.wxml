@@ -1,16 +1,19 @@
 <!--components/slide-list/slide-list.wxml-->
 <scroll-view class="wrap" style="color:{{color}};font-size:{{size}};{{sty}}" scroll-y enable-back-to-top scroll-top='{{scroll}}' lower-threshold='{{offset}}' bindscrolltolower='getList' refresher-enabled refresher-triggered='{{refresh}}' refresher-default-style='none' bindrefresherpulling='refresherpulling' bindrefresherrefresh='refresherrefresh'>
-    <!-- 自定义下拉刷新 -->
-    <view slot="refresher" class="refresh" wx:if='{{refresh !== "none"}}'>
-        <text wx:if='{{triggerStaye == 0}}'>下拉即可刷新...</text>
-        <text wx:elif='{{triggerStaye == 1}}'>释放即可刷新...</text>
-        <block wx:elif='{{triggerStaye == 2}}'>
-            <view class="icon" style="width:{{size}};height:{{size}}"></view>
-            <text>{{loadTxt}}</text>
-        </block>
-    </view>
-    <!-- 添加滚动 -->
-    <view style="margin-top:1rpx"></view>
+    <!-- 下拉刷新 -->
+    <block wx:if='{{isRefresh}}'>
+        <!-- 自定义下拉刷新 -->
+        <view slot="refresher" class="refresh">
+            <text wx:if='{{triggerStaye == 0}}'>下拉即可刷新...</text>
+            <text wx:elif='{{triggerStaye == 1}}'>释放即可刷新...</text>
+            <block wx:elif='{{triggerStaye == 2}}'>
+                <view class="icon" style="width:{{size}};height:{{size}}"></view>
+                <text>{{loadTxt}}</text>
+            </block>
+        </view>
+        <!-- 添加滚动 -->
+        <view style="margin-top:1rpx"></view>
+    </block>
     <!-- 列表内容 -->
     <slot name='list'></slot>
     <!-- 加载状态 -->

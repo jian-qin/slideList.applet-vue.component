@@ -1,4 +1,44 @@
 // components/slide-list/slide-list.js
+
+// 判断版本号
+const compareVersion = (v1, v2) => {
+    v1 = v1.split('.')
+    v2 = v2.split('.')
+    const len = Math.max(v1.length, v2.length)
+    while (v1.length < len) {
+        v1.push('0')
+    }
+    while (v2.length < len) {
+        v2.push('0')
+    }
+    for (let i = 0; i < len; i++) {
+        const num1 = parseInt(v1[i])
+        const num2 = parseInt(v2[i])
+        if (num1 > num2) {
+            return 1
+        } else if (num1 < num2) {
+            return -1
+        }
+    }
+    return 0
+}
+
+// 判断版本是否 >= 2.10.1
+const isRefresh = compareVersion(wx.getSystemInfoSync().SDKVersion, '2.10.1') != -1
+
+// 生成默认 data，用于初始化 data
+const createData = () => JSON.parse(`{
+    "list": [], ${''/* 列表数据 */}
+    "page_initial": "none", ${''/* 页码_初始值 */}
+    "page_value": 0, ${''/* 页码_当前值 */}
+    "scroll": 0, ${''/* 滚动条位置 */}
+    "state": 0, ${''/* 状态：-1 隐藏，0 加载中，1 加载完成，2 加载失败 */}
+    "isReq": true, ${''/* 请求状态 */}
+    "isRefresh": ${isRefresh}, ${''/* 版本是否支持下拉刷新 */}
+    "refresh": false, ${''/* 下拉刷新状态：true 已触发，false 未触发 */}
+    "triggerStaye": 0 ${''/* 触发下拉刷新状态：0 下拉，1 释放，2 加载 */}
+}`)
+
 Component({
     options: {
         multipleSlots: true // 启用多slot支持
@@ -9,13 +49,11 @@ Component({
     properties: {
         reqFn: { // 请求函数
             type: Function,
-            value() {}
-        },
-        reqData: { // 请求参数
-            type: Array,
-            value: [],
+            value: null,
             observer(e) {
-                e[0] && this.initialize()
+                if (typeof e != 'function') return
+                this.setData(createData())
+                this.getList()
             }
         },
         backSucc: { // 请求成功回调
@@ -59,100 +97,26 @@ Component({
     /**
      * 组件的初始数据
      */
-    data: {
-        list: [], // 列表数据
-        page: { // 页码
-            index: 1, // 请求对象下标
-            key: 'page', // 页码key
-            initial: 0, // 初始值
-            value: 0, // 当前值
-        },
-        scroll: 0, // 滚动条位置
-        state: 0, // 状态：-1 隐藏，0 加载中，1 加载完成，2 加载失败
-        isReq: true, // 请求状态
-        refresh: false, // 下拉刷新状态：true 已触发，false 未触发，'none' 版本不支持
-        triggerStaye: 0, // 触发下拉刷新状态：0 下拉，1 释放，2 加载
-    },
-
-    lifetimes: {
-        // 在组件实例进入页面节点树时执行
-        attached() {
-            this.compareVersion(wx.getSystemInfoSync().SDKVersion, '2.10.1') == -1 && this.setData({
-                refresh: 'none'
-            })
-        },
-    },
+    data: createData(),
 
     /**
      * 组件的方法列表
      */
     methods: {
-        // 判断版本号
-        compareVersion(v1, v2) {
-            v1 = v1.split('.')
-            v2 = v2.split('.')
-            const len = Math.max(v1.length, v2.length)
-            while (v1.length < len) {
-                v1.push('0')
-            }
-            while (v2.length < len) {
-                v2.push('0')
-            }
-            for (let i = 0; i < len; i++) {
-                const num1 = parseInt(v1[i])
-                const num2 = parseInt(v2[i])
-                if (num1 > num2) {
-                    return 1
-                } else if (num1 < num2) {
-                    return -1
-                }
-            }
-            return 0
-        },
-        // 初始化
-        initialize() {
-            let arr = this.data.reqData
-            for (let i in arr) {
-                if (typeof arr[i] == 'object') {
-                    for (let k in arr[i]) {
-                        if (!k.indexOf('__')) { // 查找‘页码标记’
-                            let key = k.substring(2)
-                            let val = arr[i][k]
-                            delete arr[i][k]
-                            arr[i][key] = val
-                            this.data.page = {
-                                index: i,
-                                key,
-                                initial: val,
-                                value: val
-                            }
-                            this.data.state = 0
-                            this.data.list = []
-                            this.data.isReq = true
-                            this.data.triggerStaye = 0
-                            this.setData({
-                                scroll: 0
-                            })
-                            this.getList()
-                            return
-                        }
-                    }
-                }
-            }
-            console.error('请先标记页码：‘__页码’')
-        },
         // 请求列表数据
         getList() {
             if (!(this.data.isReq && (this.data.state == 0 || this.data.state == 2))) return
             this.data.isReq = false
-            let page = this.data.page.value
-            this.data.reqData[this.data.page.index][this.data.page.key] = page
-            this.data.reqFn(...this.data.reqData).then(e => {
+            this.data.reqFn(
+                (p = 0) => this.data.page_initial == 'none' ? (this.data.page_initial = this.data.page_value = p) : this.data.page_value
+            ).then(e => {
                 this.data.isReq = true
-                this.data.backSucc(e, (list = [], fn) => {
+                this.data.backSucc(e, (list, fn) => {
+                    if (!list) list = []
+                    let page_val = this.data.page_value
                     if (list[0]) {
                         this.data.list = this.data.list.concat(list)
-                        ++this.data.page.value
+                        ++this.data.page_value
                         this.setData({
                             state: 0
                         })
@@ -161,15 +125,15 @@ Component({
                             state: this.data.list[0] ? 1 : -1 // 暂无内容提示
                         })
                     }
-                    fn(this.data.list, page, this.data.state)
-                    list[0] && page == this.data.page.initial && this.getList() // 加载第2页
+                    fn(this.data.list, page_val, this.data.state)
+                    list[0] && page_val == this.data.page_initial && this.getList() // 加载第2页
                 })
             }).catch(er => {
                 this.data.isReq = true
                 this.setData({
                     state: 2
                 })
-                this.data.backFail(er, this.data.page.value, this.data.state)
+                this.data.backFail(er, this.data.page_value, this.data.state)
             })
         },
         // 自定义下拉刷新控件被下拉
@@ -192,14 +156,15 @@ Component({
             })
             // 刷新列表
             this.data.isReq = false
-            let page = this.data.page.initial
-            this.data.reqData[this.data.page.index][this.data.page.key] = page
-            this.data.reqFn(...this.data.reqData).then(e => {
+            this.data.reqFn(
+                () => this.data.page_initial
+            ).then(e => {
                 this.data.isReq = true
-                this.data.backSucc(e, (list = [], fn) => {
+                this.data.backSucc(e, (list, fn) => {
+                    if (!list) list = []
                     this.data.list = list
                     if (list[0]) {
-                        this.data.page.value = page + 1
+                        this.data.page_value = this.data.page_initial - -1
                         this.setData({
                             state: 0,
                             refresh: false
@@ -210,7 +175,7 @@ Component({
                             refresh: false
                         })
                     }
-                    fn(list, page, this.data.state)
+                    fn(list, this.data.page_initial, this.data.state)
                     list[0] && this.getList() // 加载第2页
                 })
             }).catch(er => {
@@ -219,7 +184,7 @@ Component({
                     state: 2,
                     refresh: false
                 })
-                this.data.backFail(er, this.data.page.value, this.data.state)
+                this.data.backFail(er, this.data.page_initial, this.data.state)
             })
         },
     }
