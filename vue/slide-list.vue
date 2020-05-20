@@ -1,12 +1,13 @@
 // 分页列表
 <template>
-    <div :class="['wrap', noData ? 'noData' : '']" style="height:100%;color:#999">
+    <div class="slide-_-list">
         <pull-refresh 
             :disabled='!isRefresh' 
             v-model='refresh' 
             success-text='刷新完成' 
             @refresh="++refreshCall" 
-            style="height:100%;overflow-y:auto"
+            style="height:100%;overflow-y:auto" 
+            :class="noData ? 'noData' : ''" 
         >
             <list 
                 v-model='load' 
@@ -21,7 +22,7 @@
             >
                 <slot></slot>
                 <slot name='noData'>
-                    <div class="noData-reserve" v-if="noData">无数据</div>
+                    <div class="reserve" v-if="noData">无数据</div>
                 </slot>
             </list>
         </pull-refresh>
@@ -137,22 +138,26 @@ export default {
 </script>
 
 <style scoped>
-.wrap /deep/ .van-pull-refresh__track {
+.slide-_-list {
+    height:100%;
+    color:#999;
+}
+.slide-_-list /deep/ .van-pull-refresh__track {
     height: 100%;
 }
-.wrap /deep/ .van-pull-refresh__head,
-.wrap /deep/ .van-loading,
-.wrap /deep/ .van-loading__text,
-.wrap /deep/ .van-list__loading,
-.wrap /deep/ .van-list__error-text,
-.wrap /deep/ .van-list__finished-text {
+.slide-_-list /deep/ .van-pull-refresh__head,
+.slide-_-list /deep/ .van-loading,
+.slide-_-list /deep/ .van-loading__text,
+.slide-_-list /deep/ .van-list__loading,
+.slide-_-list /deep/ .van-list__error-text,
+.slide-_-list /deep/ .van-list__finished-text {
     color: inherit;
 }
 .noData /deep/ .van-list__finished-text {
     display: none;
 }
 /* 无数据提示（根据项目需求，设置默认的无数据提示） */
-.noData-reserve {
+.reserve {
     text-align: center;
     line-height: 3rem;
 }
