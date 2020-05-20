@@ -119,17 +119,17 @@ export default {
         getList() {
             let isInitial = this.page === null
             this.reqFn(p => isInitial ? (this.page = p || 0) : this.page).then(e => {
-                this.refresh = false
                 let list = this.backSucc(e) || []
+                this.list_than = this[isInitial ? 'list_initial' : 'value'].concat(list)
+                this.$emit('input', this.list_than)
+                this.refresh = false
+                this.load = false
                 if (list[0]) {
-                    this.list_than = this[isInitial ? 'list_initial' : 'value'].concat(list)
-                    this.$emit('input', this.list_than)
                     ++this.page
                 } else {
                     this.end = true
-                    if (!this.value[0]) this.noData = true
+                    if (!this.list_than[0]) this.noData = true
                 }
-                this.load = false
             }).catch(er => {
                 this.refresh = false
                 this.load = false
