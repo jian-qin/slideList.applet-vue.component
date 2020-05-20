@@ -8,6 +8,7 @@
             @refresh="++refreshCall" 
             style="height:100%;overflow-y:auto" 
             :class="noData ? 'noData' : ''" 
+            name='slide-_-list-scroll' 
         >
             <list 
                 v-model='load' 
@@ -109,7 +110,10 @@ export default {
             this.end = false
             this.err = false
             this.noData = false
-            this.$nextTick(this.getList) // $nextTick 隔绝对 计算属性 的影响
+            this.$nextTick(() => { // 隔绝对 计算属性 的影响
+                document.getElementsByName('slide-_-list-scroll')[0].scrollTop = 0
+                this.getList()
+            })
         },
         // 请求列表数据
         getList() {
