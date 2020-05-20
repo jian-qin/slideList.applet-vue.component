@@ -24,17 +24,15 @@ const compareVersion = (v1, v2) => {
 }
 
 // 判断版本是否 >= 2.10.1
-const isRefresh = compareVersion(wx.getSystemInfoSync().SDKVersion, '2.10.1') != -1
+const canRefresh = compareVersion(wx.getSystemInfoSync().SDKVersion, '2.10.1') != -1
 
 // 生成默认 data，用于初始化 data
 const createData = () => JSON.parse(`{
-    "list": [], ${''/* 列表数据 */}
-    "page_initial": "none", ${''/* 页码_初始值 */}
-    "page_value": 0, ${''/* 页码_当前值 */}
+    "page": null, ${''/* 页码 */}
     "scroll": 0, ${''/* 滚动条位置 */}
     "state": 0, ${''/* 状态：-1 隐藏，0 加载中，1 加载完成，2 加载失败 */}
     "isReq": true, ${''/* 请求状态 */}
-    "isRefresh": ${isRefresh}, ${''/* 版本是否支持下拉刷新 */}
+    "canRefresh": ${canRefresh}, ${''/* 版本是否支持下拉刷新 */}
     "refresh": false, ${''/* 下拉刷新状态：true 已触发，false 未触发 */}
     "triggerStaye": 0 ${''/* 触发下拉刷新状态：0 下拉，1 释放，2 加载 */}
 }`)
@@ -47,12 +45,21 @@ Component({
      * 组件的属性列表
      */
     properties: {
+        list: { // 列表数据_当前值
+            type: Array,
+            value: []
+        },
+        listInitial: { // 列表数据_初始值
+            type: Array,
+            value: []
+        },
         reqFn: { // 请求函数
             type: Function,
             value: null,
             observer(e) {
                 if (typeof e != 'function') return
                 this.setData(createData())
+                this.data.list = this.data.listInitial
                 this.getList()
             }
         },
@@ -92,6 +99,10 @@ Component({
             type: Number,
             value: 300
         },
+        isRefresh: { // 是否启用下拉刷新
+            type: Boolean,
+            value: true
+        }
     },
 
     /**
@@ -107,31 +118,33 @@ Component({
         getList() {
             if (!(this.data.isReq && (this.data.state == 0 || this.data.state == 2))) return
             this.data.isReq = false
-            this.data.reqFn(
-                (p = 0) => this.data.page_initial == 'none' ? (this.data.page_initial = this.data.page_value = p) : this.data.page_value
-            ).then(e => {
+            let isInitial = this.data.page === null
+            this.data.reqFn(p => isInitial ? (this.data.page = p || 0) : this.data.page).then(e => {
                 this.data.isReq = true
                 this.data.backSucc(e, (list, fn) => {
                     if (!list) list = []
-                    let page_val = this.data.page_value
+                    let page = this.data.page
                     if (list[0]) {
                         this.data.list = this.data.list.concat(list)
-                        ++this.data.page_value
+                        ++this.data.page
                         this.setData({
-                            state: 0
+                            state: 0,
+                            refresh: false
                         })
                     } else {
                         this.setData({
-                            state: this.data.list[0] ? 1 : -1 // 暂无内容提示
+                            state: this.data.list[0] ? 1 : -1, // 暂无内容提示
+                            refresh: false
                         })
                     }
-                    fn(this.data.list, page_val, this.data.state)
-                    list[0] && page_val == this.data.page_initial && this.getList() // 加载第2页
+                    fn(this.data.list, page, this.data.state)
+                    list[0] && isInitial && this.getList() // 加载第2页
                 })
             }).catch(er => {
                 this.data.isReq = true
                 this.setData({
-                    state: 2
+                    state: 2,
+                    refresh: false
                 })
                 this.data.backFail(er, this.data.page_value, this.data.state)
             })
@@ -154,38 +167,11 @@ Component({
             this.setData({
                 triggerStaye: 2
             })
-            // 刷新列表
-            this.data.isReq = false
-            this.data.reqFn(
-                () => this.data.page_initial
-            ).then(e => {
-                this.data.isReq = true
-                this.data.backSucc(e, (list, fn) => {
-                    if (!list) list = []
-                    this.data.list = list
-                    if (list[0]) {
-                        this.data.page_value = this.data.page_initial - -1
-                        this.setData({
-                            state: 0,
-                            refresh: false
-                        })
-                    } else {
-                        this.setData({
-                            state: -1, // 暂无内容提示
-                            refresh: false
-                        })
-                    }
-                    fn(list, this.data.page_initial, this.data.state)
-                    list[0] && this.getList() // 加载第2页
-                })
-            }).catch(er => {
-                this.data.isReq = true
-                this.setData({
-                    state: 2,
-                    refresh: false
-                })
-                this.data.backFail(er, this.data.page_initial, this.data.state)
-            })
-        },
+            this.data.page = null
+            this.data.state = 0
+            this.data.isReq = true
+            this.data.list = this.data.listInitial
+            this.getList()
+        }
     }
 })
