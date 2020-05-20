@@ -30,7 +30,7 @@ Page({
     // 初始化
     initialize() {
         this.setData({
-            reqFn: fn => ajax.get('/apis/getGoodsList', {
+            reqFn: fn => ajax.get('/apis/getList', {
                 page: fn(0) // 设置初始页码为 0（不传默认为 0）
             }),
             backSucc: (e, fn) => {
@@ -111,9 +111,9 @@ export default {
     methods: {
         // 获取列表数据
         getList() {
-            this.reqFn = fn => this.$fn.get('getList', {
+            this.reqFn = fn => this.$ajax.get('/apis/getList', {
                 page: fn(0) // 设置初始页码为 0（不传默认为 0）
-            }, { fail: false })
+            })
             this.backSucc = e => {
                 console.log('本次请求的页码:', this.$refs.list.page)
                 console.log('列表数据', e)
