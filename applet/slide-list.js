@@ -59,7 +59,6 @@ Component({
             observer(e) {
                 if (typeof e != 'function') return
                 this.setData(createData())
-                this.data.list = this.data.listInitial
                 this.getList()
             }
         },
@@ -123,9 +122,9 @@ Component({
                 this.data.isReq = true
                 this.data.backSucc(e, (list, fn) => {
                     if (!list) list = []
+                    this.data.list = this.data[isInitial ? 'listInitial' : 'list'].concat(list)
                     let page = this.data.page
                     if (list[0]) {
-                        this.data.list = this.data.list.concat(list)
                         ++this.data.page
                         this.setData({
                             state: 0,
@@ -138,7 +137,7 @@ Component({
                         })
                     }
                     fn(this.data.list, page, this.data.state)
-                    list[0] && isInitial && this.getList() // 加载第2页
+                    isInitial && list[0] && this.getList() // 加载第2页
                 })
             }).catch(er => {
                 this.data.isReq = true
@@ -146,7 +145,7 @@ Component({
                     state: 2,
                     refresh: false
                 })
-                this.data.backFail(er, this.data.page_value, this.data.state)
+                this.data.backFail(er, this.data.page, this.data.state)
             })
         },
         // 自定义下拉刷新控件被下拉
@@ -170,7 +169,6 @@ Component({
             this.data.page = null
             this.data.state = 0
             this.data.isReq = true
-            this.data.list = this.data.listInitial
             this.getList()
         }
     }
