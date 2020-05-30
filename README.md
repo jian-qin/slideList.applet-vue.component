@@ -4,7 +4,7 @@
 使用了 Promise 封装的 ajax，考虑一般来说都会封装 ajax，就不兼容原版的 ajax 请求方式了；
 如果有使用原版 ajax 的需求，可以在 GitHub 上提 bug。
 
-- GitHub：<https://github.com/jian-qin/list.applet-vue.component>
+- GitHub：<https://github.com/jian-qin/slideList.applet-vue.component>
 
 
 

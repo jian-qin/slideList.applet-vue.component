@@ -101,6 +101,10 @@ Component({
         isRefresh: { // 是否启用下拉刷新
             type: Boolean,
             value: true
+        },
+        resetScroll: { // 是否启用重置滚动位置
+            type: Boolean,
+            value: true
         }
     },
 
