@@ -75,6 +75,10 @@ export default {
         isRefresh: { // 是否启用下拉刷新
             type: Boolean,
             default: true
+        },
+        resetScroll: { // 是否启用重置滚动位置
+            type: Boolean,
+            default: true
         }
     },
     data: v => ({
@@ -111,7 +115,7 @@ export default {
             this.err = false
             this.noData = false
             this.$nextTick(() => { // 隔绝对 计算属性 的影响
-                document.getElementsByName('slide-_-list-scroll')[0].scrollTop = 0
+                if (this.resetScroll) document.getElementsByName('slide-_-list-scroll')[0].scrollTop = 0
                 this.getList()
             })
         },

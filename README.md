@@ -74,7 +74,7 @@ Page({
 | req-fn | null | 请求函数 | 被‘=’重置赋值时，组件将 初始化参数 执行此函数 |
 | back-succ | () => {} | 请求成功回调 |
 | back-fail | () => {} | 请求失败回调 |
-| sty | '' | 组件样式 |
+| sty | '' | 组件样式 | 高度不能为 auto |
 | color | '#999' | 字体颜色 |
 | size | '28rpx' | 字体大小 |
 | load-txt | '加载中...' | 加载过程中的提示文案 |
@@ -82,6 +82,7 @@ Page({
 | error-txt | '请求失败，点击重新加载' | 加载失败后的提示文案 |
 | offset | 300 | 滚动条与底部距离小于 offset 时触发加载事件 |
 | is-refresh | true | 是否启用下拉刷新 |
+| reset-scroll | true | 是否启用重置滚动位置 |
 
 
 
@@ -90,7 +91,7 @@ Page({
 ```html
 <slide-list 
     v-model='list' :req-fn='reqFn' :back-succ='backSucc' // 基础参数（必传）
-    style='height:100%;color:#999;background-color:white;' // 设置组件样式（默认 高100% 文字颜色#999）
+    style='height:100%;color:#999;background-color:white;' // 设置组件样式（默认 高100% 文字颜色#999）*注意：高度不能为 auto
     ref='list' // 标记（获取组件实例：操作 page页码、list_than列表数据_指针对比值）
 >
     <div v-for=''>列表内容...</div>
@@ -148,3 +149,4 @@ export default {
 | error-txt | '请求失败，点击重新加载' | 加载失败后的提示文案 |
 | offset | 300 | 滚动条与底部距离小于 offset 时触发加载事件 |
 | is-refresh | true | 是否启用下拉刷新 |
+| reset-scroll | true | 是否启用重置滚动位置 |
