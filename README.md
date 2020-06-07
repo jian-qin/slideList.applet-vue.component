@@ -88,6 +88,8 @@ Page({
 
 ## Vue
 
+> 注意 Vue 版：使用了 ui 框架 Vant 中的 List、PullRefresh、Empty 组件，需要引入 Vant 框架。
+
 ```html
 <slide-list 
     v-model='list' :req-fn='reqFn' :back-succ='backSucc' // 基础参数（必传）

@@ -23,7 +23,7 @@
             >
                 <slot></slot>
                 <slot name='noData'>
-                    <div class="reserve" v-if="noData">无数据</div>
+                    <empty description="暂无数据" v-if="noData" />
                 </slot>
             </list>
         </pull-refresh>
@@ -32,12 +32,13 @@
 </template>
 
 <script>
-import { List, PullRefresh } from 'vant'
+import { List, PullRefresh, Empty } from 'vant'
 export default {
     name: "slide-list",
     components: {
         List,
-        PullRefresh
+        PullRefresh,
+        Empty
     },
     props: {
         value: { // 列表数据
@@ -165,8 +166,5 @@ export default {
     display: none;
 }
 /* 无数据提示（根据项目需求，设置默认的无数据提示） */
-.reserve {
-    text-align: center;
-    line-height: 3rem;
-}
+
 </style>
