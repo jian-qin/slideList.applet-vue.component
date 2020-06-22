@@ -7,7 +7,7 @@
             success-text='刷新完成' 
             @refresh="++refreshCall" 
             style="height:100%;overflow-y:auto" 
-            :class="noData ? 'noData' : ''" 
+            :class="`_scroll ${noData ? 'noData' : ''}`" 
             name='slide-_-list-scroll' 
         >
             <list 
@@ -22,8 +22,8 @@
                 @load='getList' 
             >
                 <slot></slot>
-                <slot name='noData'>
-                    <empty description="暂无数据" v-if="noData" />
+                <slot name='noData' v-if="noData">
+                    <empty description="暂无数据" />
                 </slot>
             </list>
         </pull-refresh>
@@ -76,13 +76,9 @@ export default {
         isRefresh: { // 是否启用下拉刷新
             type: Boolean,
             default: true
-        },
-        resetScroll: { // 是否启用重置滚动位置
-            type: Boolean,
-            default: true
         }
     },
-    data: v => ({
+    data: vm => ({
         list_initial: null, // 列表数据_初始值
         list_than: null, // 列表数据_指针对比值
         page: null, // 页码
@@ -116,7 +112,8 @@ export default {
             this.err = false
             this.noData = false
             this.$nextTick(() => { // 隔绝对 计算属性 的影响
-                if (this.resetScroll) document.getElementsByName('slide-_-list-scroll')[0].scrollTop = 0
+                let dom = document.getElementsByName('slide-_-list-scroll')[0]
+                if (dom) dom.scrollTop = 0
                 this.getList()
             })
         },
