@@ -1,0 +1,84 @@
+/* components/slide-lists.wxss */
+/* 刷新 */
+.refresh{
+    pointer-events: none;
+    position: relative;
+    z-index: 999;
+}
+.refresh>view{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 220rpx;
+    overflow: hidden;
+}
+.refresh>view>view{
+    position: absolute;
+    left: calc(50% - 35rpx);
+    top: 0;
+    margin-top: -74rpx;
+    width: 70rpx;
+    height: 70rpx;
+    border-radius: 50%;
+    background-color: white;
+    transition: transform .3s;
+}
+.refresh>view>view>view{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+.refresh>view>view>view>view{
+    width: 30rpx;
+    height: 30rpx;
+    border-radius: 50%;
+}
+.refresh>view>view>view>text{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    clip-path: polygon(36rpx 12rpx, 36rpx 26rpx, 44rpx 20rpx);
+}
+/* 加载状态提示 */
+.loadState1{
+    text-align: center;
+    padding: 60rpx 0;
+}
+.loadState1>icon{
+    padding-bottom: 60rpx;
+}
+.loadState2{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100rpx;
+}
+.loadState2>view{
+    width: 28rpx;
+    height: 28rpx;
+    margin-right: 20rpx;
+    border-bottom-color: transparent !important;
+    border-radius: 50%;
+}
+.loadState3{
+    line-height: 100rpx;
+    text-align: center;
+}
+/* 转圈动画 */
+.rotate{
+    animation: rotate .75s linear 0s infinite;
+}
+@keyframes rotate{
+    to {
+        transform: rotate(360deg);
+    }
+    from {
+        transform: rotate(0deg);
+    }
+}

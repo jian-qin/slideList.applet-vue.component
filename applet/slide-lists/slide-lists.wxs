@@ -1,0 +1,136 @@
+// # 下拉刷新
+
+
+// 数据
+var data = {
+    dropCache: 0, // 缓存触摸坐标
+    dropRefresh: 70, // 边境距离-刷新
+    dropSlow: 100, // 边境距离-减速
+    dropMax: 110, // 边境距离-最大
+    dropStep: 1, // 边境距离-步长
+    dropOngoing: false, // 刷新状态
+    dropTop: 0, // 刷新图标位置
+    upDropCache: true, // 更新缓存触摸坐标
+}
+
+// 函数
+var methods = {
+    // 下拉-进行中
+    dropMove: function(e, ins) {
+        if (data.dropCache == 0) return // 是否禁用滚动加载更多
+        if (data.upDropCache) { // 更新缓存触摸坐标
+            data.upDropCache = false
+            data.dropCache = e.touches[0].clientY
+        }
+        var y = e.touches[0].clientY - data.dropCache
+        if (y > 0) {
+            var t = y
+            if (y > data.dropSlow) t = data.dropSlow + (y - data.dropSlow) / 6 // 减速
+            data.dropTop = t > data.dropMax ? data.dropMax : t
+        } else {
+            data.dropTop = 0
+        }
+        data.dropOngoing = data.dropTop >= data.dropRefresh
+        ins.callMethod('jsVar', {
+            turnAn: 0
+        })
+        ins.selectComponent('#top').setStyle({ // 刷新图标-位置
+            top: data.dropTop + 'px'
+        })
+        ins.selectComponent('#round').setStyle({ // 刷新图标-颜色
+            opacity: data.dropOngoing ? '1' : '.4'
+        })
+        ins.selectComponent('#ring').setStyle({ // 刷新图标-环进度
+            'clip-path': methods.clipFan(data.dropTop > data.dropRefresh ? data.dropTop * data.dropStep + 20 : data.dropTop * data.dropStep / 5, data.dropTop * data.dropStep)
+        })
+        ins.selectComponent('#arrow').setStyle({ // 刷新图标-箭头
+            transform: 'rotate(' + (data.dropTop * data.dropStep * 3.6) + 'deg)'
+        })
+        return false
+    },
+    // 下拉-结束
+    dropEnd: function(e, ins) {
+        if (data.dropCache == 0) return
+        data.upDropCache = true
+        methods.dropTopAnimation(ins, data.dropOngoing ? data.dropRefresh : 0)
+    },
+    // 位移动画
+    dropTopAnimation: function(ins, y) {
+        var n = (data.dropTop - y) / 12
+        var top = 0
+        function interval() {
+            top = data.dropTop - n
+            if (top > y) {
+                data.dropTop = top
+                ins.requestAnimationFrame(interval)
+            } else {
+                data.dropTop = y
+                y && ins.callMethod('refresh')
+            }
+            ins.selectComponent('#top').setStyle({ // 刷新图标-位置
+                top: data.dropTop + 'px'
+            })
+        }
+        interval()
+    },
+    // 设置扇形
+    clipFan: function(s, e) {
+        // 起点和终点默认为 0
+        if (e === undefined) {
+            e = s || 0
+            s = 0
+        }
+        // 起点和终点相同时不用计算，直接隐藏
+        if (s == e) return 'polygon(0% 0%)'
+        // 取余100：让 100 == 0，120 == 20
+        s %= 100
+        e %= 100
+        // 单位转换：100% == 360度
+        s *= 3.6 // 起点角度
+        e *= 3.6 // 终点角度
+        var pn = Math.PI / 180
+        // 减 90度 设置为从 12点钟方向 为 0% 的坐标
+        var so = (s - 90) * pn // 起点角度
+        var eo = (e - 90) * pn // 终点角度
+        // 圆上任一点坐标 x：(圆点坐标x) + (圆半径r) * cos( (角度ao) * (π3.14) / 180 )
+        // 圆上任一点坐标 y：(圆点坐标y) + (圆半径r) * sin( (角度ao) * (π3.14) / 180 )
+        // 默认圆点坐标 (50,50)，意思为 (50%,50%)
+        // 设置坐标到2倍圆上，可以减少坐标数量
+        var sx = 50 + 100 * Math.cos(so) // 起点坐标x
+        var sy = 50 + 100 * Math.sin(so) // 起点坐标y
+        var ex = 50 + 100 * Math.cos(eo) // 终点坐标x
+        var ey = 50 + 100 * Math.sin(eo) // 终点坐标y
+        // 计算起点到终点之间的坐标
+        var kn = '50% 50%,' + sx + '% ' + sy + '%' // 原点坐标->起点坐标
+        var kArr = ['150% -50%', '150% 150%', '-50% 150%', '-50% -50%'] // 圆外正方形的4个顶点坐标（保险起见用1.5倍坐标）
+        var sua = ~~(s / 90) // 起点所属象限
+        var eua = ~~(e / 90) // 终点所属象限
+        if (sua == eua && e > s) { // 起点和终点在同一象限，并且 终点角度 大于 起点角度
+            kn += ',' + kArr[sua] + ',' + ex + '% ' + ey + '%'
+        } else { // 加上起点到终点经过的 圆外正方形的顶点坐标
+            var isfor = true
+            do {
+                kn += ',' + kArr[sua]
+                sua = sua == 3 ? 0 : sua + 1
+                if (sua == eua) {
+                    kn += ',' + kArr[sua] + ',' + ex + '% ' + ey + '%'
+                    isfor = false
+                }
+            } while (isfor)
+        }
+        return 'polygon(' + kn + ')'
+    },
+}
+
+// js通讯 - 变量
+function wxsVar(prop) {
+    for (var i = prop.length-1; i > -1; i--)
+        data[prop[i].key] = prop[i].val
+}
+
+module.exports = {
+    wxsVar: wxsVar,
+    dropStart: methods.dropStart,
+    dropMove: methods.dropMove,
+    dropEnd: methods.dropEnd,
+}
