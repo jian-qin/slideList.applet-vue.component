@@ -1,8 +1,8 @@
 // 分页列表（模仿的b站app）
 <template>
     <div 
+        class="slide-_-lists"
         :style="{
-            height: '100%',
             fontSize: em + 'px',
             overflowY: refBox && refCon ? '' : (dropTop ? 'hidden' : 'auto')
         }" 
@@ -446,6 +446,9 @@ export default {
 </script>
 
 <style scoped>
+.slide-_-lists{
+    height: 100%;
+}
 /* 刷新 */
 .refresh{
     pointer-events: none;
