@@ -22,7 +22,7 @@ methods: {
     // 初始化
     initial() {
         this.reqFn = fn => this.$ajax.post({ // 必须使用Promise封装ajax
-            url: '', // 请求地址
+            url: "", // 请求地址
             data: { // 请求传参
                 page: fn(0), // 页码，从0开始
             }
@@ -30,7 +30,7 @@ methods: {
         this.backSucc = e => {
             let arr = e.data.arr // 当前请求的列表数据
             // 可以在这里处理arr
-            return arr // 拼接上前面页码的数据（不要自己拼接）
+            return arr // 让组件拼接上前面页码的数据（不要自己拼接）
         }
     },
 }
@@ -47,9 +47,24 @@ methods: {
 </slide-lists>
 ```
 
-## 多个分页列表
+## 更新列表中指定的项
 
-+ 小程序因为setData限制，无法实现多个分页列表
+```html
+<slide-lists ref="slide" ...
+```
+
+```js
+methods: {
+    // 点赞
+    praise(i) {
+        ...
+        // 接口调用成功
+        this.$refs.updata(i) // i：点赞项的下标
+    },
+}
+```
+
+## 多个分页列表
 
 ```html
 <div ref="father">

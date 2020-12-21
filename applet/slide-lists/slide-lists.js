@@ -30,6 +30,13 @@ Component({
                 n && this.getList()
             }
         },
+        updata: { // 更新列表中指定的项的下标
+            type: [Number, String],
+            value: null,
+            observer(i) {
+                i !== null && this.updataFn()
+            }
+        },
         reqFn: { // 请求函数
             type: Function,
             value: null,
@@ -46,7 +53,7 @@ Component({
             value: null
         },
         offset: { // 滚动条与底部距离小于 offset 时触发加载事件
-            type: Number,
+            type: [Number, String],
             value: 300
         },
         dropDisable: { // 是否禁用下拉刷新
@@ -74,6 +81,7 @@ Component({
         // 加载更多
         loadState: 0, // 加载状态 -1加载失败(首屏) 0无提示 1加载中 2没有更多 3无数据 4加载失败(更多)
         page: null, // 当前页码
+        size: null, // 每页数量
         // 刷新
         dropRefresh: 70, // 边境距离-刷新
         dropSlow: 100, // 边境距离-减速
@@ -141,7 +149,10 @@ Component({
                 }]
             })
             this.data.reqFn(p => this.data.page = p || 0).then(e => {
-                this.data.backSucc(e, newList => newList)
+                this.data.backSucc(e, (newList = []) => {
+                    this.data.size = newList.length
+                    return newList
+                })
                 this.rotateAnEnd()
                 this.data.dropTipsDisable || wx.showToast({
                     title: '刷新成功',
@@ -171,7 +182,11 @@ Component({
         rotateAnEnd() {
             this.setData({
                 dropOngoing: false,
-                turnAn: 2
+                turnAn: 2,
+                wxsVar: [{
+                    key: 'dropOngoing',
+                    val: false
+                }]
             })
             setTimeout(() => {
                 this.setData({
@@ -202,7 +217,14 @@ Component({
             let isOne = this.data.page === null
             this.data.reqFn(p => isOne ? (this.data.page = p || 0) : this.data.page).then(e => {
                 let oldL = isOne ? 0 : this.data.list.length
-                this.data.backSucc(e, newList => (isOne ? [] : this.data.list).concat(newList))
+                this.data.backSucc(e, (newList = []) => {
+                    if (isOne) {
+                        this.data.size = newList.length
+                        return newList
+                    } else {
+                        return this.data.list.concat(newList)
+                    }
+                })
                 if (this.data.list.length > oldL) {
                     ++this.data.page
                     this.setData({
@@ -224,6 +246,20 @@ Component({
                 })
                 this.data.backFail && this.data.backFail(er)
             })
+        },
+        // 更新列表中指定的项
+        updataFn() {
+            if (this.data.reqFn && this.data.backSucc && this.data.size !== null) {
+                let i = this.data.updata
+                this.data.updata = null
+                this.data.reqFn(() => Math.ceil((i - -1) / this.data.size)).then(e => {
+                    this.data.backSucc(e, (newList = []) => {
+                        let item = newList[i % this.data.size]
+                        item !== undefined && this.data.list.splice(i, 1, item)
+                        return this.data.list
+                    })
+                })
+            }
         },
         // wxs通讯 - 设置变量
         jsVar(e) {

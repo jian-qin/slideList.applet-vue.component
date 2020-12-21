@@ -1,6 +1,17 @@
 <!--components/slide-lists.wxml-->
 <wxs module="wxs" src="./slide-lists.wxs"></wxs>
-<scroll-view scroll-y style="height:{{height}}" lower-threshold="{{offset}}" catchscrolltolower="{{dropOngoing ? '' : getList()}}" change:wxsVar="{{wxs.wxsVar}}" wxsVar="{{wxsVar}}" bindtouchstart="dropStart" catchtouchmove="{{wxs.dropMove}}" catchtouchend="{{wxs.dropEnd}}" catchtouchcancel="{{wxs.dropEnd}}">
+<scroll-view 
+    scroll-y 
+    style="height:{{height}}" 
+    lower-threshold="{{offset}}" 
+    catchscrolltolower="getList" 
+    change:wxsVar="{{wxs.wxsVar}}" 
+    wxsVar="{{wxsVar}}" 
+    bindtouchstart="dropStart" 
+    catchtouchmove="{{wxs.dropMove}}" 
+    catchtouchend="{{wxs.dropEnd}}" 
+    catchtouchcancel="{{wxs.dropEnd}}"
+>
     <!-- 其他 -->
     <slot name="other"></slot>
     <!-- 刷新 -->
@@ -20,8 +31,9 @@
     <view style="font-size:28rpx;color:{{dnColor}}">
         <!-- 加载失败(首屏) -->
         <view class="loadState1" wx:if="{{loadState == -1}}">
-            <icon type="warn" size="100" color="{{dnColor}}"></icon>
-            <view>加载出错</view>
+            <van-empty image="error">
+                <text style="color:{{dnColor}}">加载出错</text>
+            </van-empty>
         </view>
         <!-- 加载中 -->
         <view class="loadState2" wx:elif="{{loadState == 1}}">
@@ -32,8 +44,9 @@
         <view class="loadState3" wx:elif="{{loadState == 2}}">没有更多了</view>
         <!-- 无数据 -->
         <view class="loadState1" wx:elif="{{loadState == 3}}">
-            <icon type="warn" size="100" color="{{dnColor}}"></icon>
-            <view>暂无数据</view>
+            <van-empty>
+                <text style="color:{{dnColor}}">暂无数据</text>
+            </van-empty>
         </view>
         <!-- 加载失败(更多) -->
         <view class="loadState3" wx:elif="{{loadState == 4}}" bindtap="getList">请求失败，点击重试</view>

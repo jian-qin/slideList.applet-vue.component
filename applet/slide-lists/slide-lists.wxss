@@ -50,9 +50,6 @@
     text-align: center;
     padding: 60rpx 0;
 }
-.loadState1>icon{
-    padding-bottom: 60rpx;
-}
 .loadState2{
     display: flex;
     align-items: center;

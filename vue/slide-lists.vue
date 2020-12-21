@@ -140,6 +140,7 @@ export default {
         scrollH: 0, // 滚动高度
         loadState: 0, // 加载状态 -1加载失败(首屏) 0无提示 1加载中 2没有更多 3无数据 4加载失败(更多)
         page: null, // 当前页码
+        size: null, // 每页数量
     }),
     computed: {
         // 监听 reqFn 设置完成（必须在html中使用才能生效）
@@ -358,6 +359,7 @@ export default {
                 this.firstScreenAnimation()
                 let list = this.backSucc(e) || []
                 this.$emit('input', list)
+                this.size = list.length
                 if (list.length) {
                     ++this.page
                     this.firstDisable || this.getList()
@@ -391,6 +393,19 @@ export default {
                 this.turnAnimation()
                 this.loadState = 4
                 this.backFail && this.backFail(er)
+            })
+        },
+        // 更新列表中指定的项--ref外部调用
+        updata(i) { // i：要更新项的下标
+            this.reqFn && this.backSucc && this.size !== null && this.reqFn(
+                p => Math.ceil((i - -1) / this.size) - -(p || 0) - 1
+            ).then(e => {
+                let item = (this.backSucc(e) || [])[i % this.size]
+                if (item !== undefined) {
+                    let newList = JSON.parse(JSON.stringify(this.value))
+                    newList.splice(i, 1, item)
+                    this.$emit('input', newList)
+                }
             })
         },
 
